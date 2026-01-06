@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #74ebd5, #9face6);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .weather-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        input {
+            width: 80%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 8px 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .weather-info {
+            margin-top: 15px;
+        }
+
+        .temp {
+            font-size: 32px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="weather-container">
+    <h2>🌤️ Weather App</h2>
+
+    <input type="text" id="cityInput" placeholder="Enter city name">
+    <br>
+    <button onclick="getWeatherByCity()">Search</button>
+    <button onclick="getWeatherByLocation()">📍 Use My Location</button>
+
+    <div class="weather-info" id="weatherInfo"></div>
+</div>
+
+<script>
+    const apiKey = "b297d1249e3a1fcebacc64e09294e3fb";
+
+    function displayWeather(data) {
+        const weatherInfo = document.getElementById("weatherInfo");
+        weatherInfo.innerHTML = `
+            <h3>${data.name}, ${data.sys.country}</h3>
+            <div class="temp">${Math.round(data.main.temp)}°C</div>
+            <p>${data.weather[0].description}</p>
+            <p>Humidity: ${data.main.humidity}%</p>
+            <p>Wind Speed: ${data.wind.speed} m/s</p>
+        `;
+    }
+
+    function getWeatherByCity() {
+        const city = document.getElementById("cityInput").value;
+        if (!city) {
+            alert("Please enter a city name");
+            return;
+        }
+
+        fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
+            .then(response => response.json())
+            .then(data => displayWeather(data))
+            .catch(() => alert("City not found"));
+    }
+
+    function getWeatherByLocation() {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`)
+                .then(response => response.json())
+                .then(data => displayWeather(data))
+                .catch(() => alert("Unable to fetch weather"));
+        });
+    }
+</script>
+
+</body>
+</html>
+
